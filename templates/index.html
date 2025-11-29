@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Inovo Mini Bank</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-900 text-slate-100 min-h-screen flex">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-slate-950 border-r border-slate-800 p-4 flex flex-col">
+    <h1 class="text-xl font-bold mb-4 text-cyan-400">Inovo Mini Bank</h1>
+    <p class="text-xs text-slate-400 mb-4">Demo banking software (local only)</p>
+
+    <div>
+      <h2 class="text-sm font-semibold text-slate-300 mb-2">Accounts</h2>
+      <ul id="accountsList" class="space-y-2 text-sm">
+        <!-- filled by JS -->
+      </ul>
+    </div>
+
+    <div class="mt-auto pt-4 border-t border-slate-800 text-xs text-slate-500">
+      <p>⚠ For demo use only</p>
+      <p>No real money &amp; no real security</p>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-6 flex flex-col gap-6">
+
+    <!-- Top Section -->
+    <section class="flex flex-col md:flex-row gap-4 items-start md:items-center">
+      <div>
+        <h2 id="accountName" class="text-2xl font-semibold text-slate-100">
+          Select an account
+        </h2>
+        <p id="accountId" class="text-sm text-slate-400 mt-1"></p>
+      </div>
+
+      <div class="ml-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Balance card -->
+        <div class="bg-slate-800 rounded-2xl px-4 py-3 shadow-lg">
+          <p class="text-xs text-slate-400">Current Balance</p>
+          <p id="balanceValue" class="text-3xl font-bold mt-1 text-emerald-400">
+            --
+          </p>
+          <p id="currency" class="text-xs text-slate-500 mt-1">--</p>
+        </div>
+
+        <!-- Quick info card -->
+        <div class="bg-slate-800 rounded-2xl px-4 py-3 shadow-lg">
+          <p class="text-xs text-slate-400">Quick Info</p>
+          <p class="text-sm mt-1 text-slate-200"><span class="font-semibold">All data is in memory.</span></p>
+          <p class="text-xs text-slate-500 mt-1">
+            Refreshing the page will reset transactions to the initial data.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Actions -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Deposit -->
+      <div class="bg-slate-800 rounded-2xl p-4 shadow-lg">
+        <h3 class="text-lg font-semibold mb-2 text-emerald-400">Deposit</h3>
+        <div class="space-y-2 text-sm">
+          <div>
+            <label class="block text-slate-300 mb-1">Amount</label>
+            <input
+              id="depositAmount"
+              type="number"
+              step="0.01"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400"
+              placeholder="Enter amount"
+            />
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Description</label>
+            <input
+              id="depositDesc"
+              type="text"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400"
+              placeholder="e.g. Salary, refund..."
+              value="Deposit"
+            />
+          </div>
+          <button
+            id="depositBtn"
+            class="mt-2 px-4 py-2 rounded-lg bg-emerald-500 text-slate-900 font-semibold text-sm hover:bg-emerald-400 transition disabled:opacity-40"
+          >
+            Add Funds
+          </button>
+        </div>
+      </div>
+
+      <!-- Withdraw -->
+      <div class="bg-slate-800 rounded-2xl p-4 shadow-lg">
+        <h3 class="text-lg font-semibold mb-2 text-rose-400">Withdraw</h3>
+        <div class="space-y-2 text-sm">
+          <div>
+            <label class="block text-slate-300 mb-1">Amount</label>
+            <input
+              id="withdrawAmount"
+              type="number"
+              step="0.01"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-rose-400"
+              placeholder="Enter amount"
+            />
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Description</label>
+            <input
+              id="withdrawDesc"
+              type="text"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-rose-400"
+              placeholder="e.g. Groceries, bill payment..."
+              value="Withdrawal"
+            />
+          </div>
+          <button
+            id="withdrawBtn"
+            class="mt-2 px-4 py-2 rounded-lg bg-rose-500 text-slate-900 font-semibold text-sm hover:bg-rose-400 transition disabled:opacity-40"
+          >
+            Withdraw Funds
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Alerts -->
+    <section id="alertBox" class="hidden">
+      <div
+        id="alertContent"
+        class="rounded-xl px-4 py-3 text-sm border"
+      ></div>
+    </section>
+
+    <!-- Transactions -->
+    <section class="bg-slate-800 rounded-2xl p-4 shadow-lg flex-1 flex flex-col">
+      <div class="flex items-center mb-3">
+        <h3 class="text-lg font-semibold text-slate-100">Recent Transactions</h3>
+      </div>
+
+      <div class="overflow-auto max-h-80">
+        <table class="min-w-full text-sm">
+          <thead class="text-slate-400 text-xs uppercase border-b border-slate-700">
+            <tr>
+              <th class="text-left py-2 pr-4">Type</th>
+              <th class="text-left py-2 pr-4">Amount</th>
+              <th class="text-left py-2 pr-4">Description</th>
+              <th class="text-left py-2">Time</th>
+            </tr>
+          </thead>
+          <tbody id="txTableBody" class="text-slate-200">
+            <!-- filled by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- JS -->
+  <script>
+    let currentAccountId = null;
+
+    function showAlert(message, type = "info") {
+      const box = document.getElementById("alertBox");
+      const content = document.getElementById("alertContent");
+      let baseClasses = "text-sm px-4 py-3 border rounded-xl";
+
+      if (type === "error") {
+        content.className = baseClasses + " bg-rose-950/60 border-rose-500/60 text-rose-200";
+      } else if (type === "success") {
+        content.className = baseClasses + " bg-emerald-950/60 border-emerald-500/60 text-emerald-200";
+      } else {
+        content.className = baseClasses + " bg-slate-900 border-slate-600 text-slate-200";
+      }
+
+      content.textContent = message;
+      box.classList.remove("hidden");
+
+      setTimeout(() => {
+        box.classList.add("hidden");
+      }, 3500);
+    }
+
+    async function fetchAccounts() {
+      const res = await fetch("/api/accounts");
+      const data = await res.json();
+
+      const list = document.getElementById("accountsList");
+      list.innerHTML = "";
+
+      data.forEach(acc => {
+        const li = document.createElement("li");
+        li.className =
+          "cursor-pointer px-3 py-2 rounded-lg hover:bg-slate-800 border border-transparent hover:border-slate-700 flex flex-col";
+        li.dataset.id = acc.id;
+        li.onclick = () => selectAccount(acc.id);
+
+        const title = document.createElement("div");
+        title.className = "flex justify-between items-center";
+        title.innerHTML = `
+          <span class="font-semibold text-slate-100">${acc.name}</span>
+          <span class="text-xs text-slate-400">${acc.currency}</span>
+        `;
+
+        const balance = document.createElement("div");
+        balance.className = "text-xs text-slate-400 mt-1";
+        balance.textContent = `Balance: ${acc.balance.toFixed(2)} ${acc.currency}`;
+
+        li.appendChild(title);
+        li.appendChild(balance);
+
+        list.appendChild(li);
+      });
+
+      if (data.length > 0) {
+        selectAccount(data[0].id);
+      }
+    }
+
+    async function selectAccount(id) {
+      currentAccountId = id;
+      const res = await fetch(`/api/accounts/${id}`);
+      if (!res.ok) {
+        showAlert("Failed to load account.", "error");
+        return;
+      }
+      const acc = await res.json();
+
+      document.getElementById("accountName").textContent = acc.name;
+      document.getElementById("accountId").textContent = "Account ID: " + acc.id;
+      document.getElementById("balanceValue").textContent =
+        acc.balance.toFixed(2) + " " + acc.currency;
+      document.getElementById("currency").textContent = acc.currency;
+
+      const tbody = document.getElementById("txTableBody");
+      tbody.innerHTML = "";
+      acc.transactions.forEach(tx => {
+        const tr = document.createElement("tr");
+        tr.className = "border-b border-slate-800/80";
+        tr.innerHTML = `
+          <td class="py-2 pr-4">
+            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+              tx.type === "Deposit"
+                ? "bg-emerald-900/50 text-emerald-300"
+                : "bg-rose-900/50 text-rose-300"
+            }">${tx.type}</span>
+          </td>
+          <td class="py-2 pr-4">${tx.amount.toFixed(2)}</td>
+          <td class="py-2 pr-4">${tx.description}</td>
+          <td class="py-2">${tx.time}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function sendTransaction(kind) {
+      if (!currentAccountId) {
+        showAlert("Please select an account first.", "error");
+        return;
+      }
+
+      let amountInput, descInput, url;
+      if (kind === "deposit") {
+        amountInput = document.getElementById("depositAmount");
+        descInput = document.getElementById("depositDesc");
+        url = `/api/accounts/${currentAccountId}/deposit`;
+      } else {
+        amountInput = document.getElementById("withdrawAmount");
+        descInput = document.getElementById("withdrawDesc");
+        url = `/api/accounts/${currentAccountId}/withdraw`;
+      }
+
+      const amount = parseFloat(amountInput.value || "0");
+      const description = descInput.value || (kind === "deposit" ? "Deposit" : "Withdrawal");
+
+      if (!amount || amount <= 0) {
+        showAlert("Enter a positive amount.", "error");
+        return;
+      }
+
+      const btn =
+        kind === "deposit"
+          ? document.getElementById("depositBtn")
+          : document.getElementById("withdrawBtn");
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount, description }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          showAlert(data.error || "Transaction failed.", "error");
+        } else {
+          document.getElementById("balanceValue").textContent =
+            data.balance.toFixed(2) + " " + document.getElementById("currency").textContent;
+
+          const tbody = document.getElementById("txTableBody");
+          tbody.innerHTML = "";
+          data.transactions.forEach(tx => {
+            const tr = document.createElement("tr");
+            tr.className = "border-b border-slate-800/80";
+            tr.innerHTML = `
+              <td class="py-2 pr-4">
+                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                  tx.type === "Deposit"
+                    ? "bg-emerald-900/50 text-emerald-300"
+                    : "bg-rose-900/50 text-rose-300"
+                }">${tx.type}</span>
+              </td>
+              <td class="py-2 pr-4">${tx.amount.toFixed(2)}</td>
+              <td class="py-2 pr-4">${tx.description}</td>
+              <td class="py-2">${tx.time}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+
+          amountInput.value = "";
+          showAlert("Transaction successful.", "success");
+        }
+      } catch (err) {
+        console.error(err);
+        showAlert("Network error.", "error");
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchAccounts();
+
+      document.getElementById("depositBtn").addEventListener("click", () => {
+        sendTransaction("deposit");
+      });
+
+      document.getElementById("withdrawBtn").addEventListener("click", () => {
+        sendTransaction("withdraw");
+      });
+    });
+  </script>
+</body>
+</html>
